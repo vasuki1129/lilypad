@@ -1,9 +1,13 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
+mainClassName = "org.game.Main"
+
+
+
 
 project.ext.lwjglVersion = "3.3.6"
-project.ext.lwjglNatives = "natives-windows"
+project.ext.lwjglNatives = "natives-linux"
 
 repositories {
     mavenCentral()

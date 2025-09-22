@@ -44,34 +44,8 @@ public abstract class Engine
     java.awt.Color pencolor = java.awt.Color.RED;
     protected ArrayList<GameObject> objects = new ArrayList<>();
 
-    public class Point
-    {
-        public Point(float x,float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override public String toString()
-        {
-            return "{" + this.x + ", " + this.y + "}";
-        }
-
-        public float x;
-        public float y;
-    }
-
-    public class Size
-    {
-        public Size(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-
-        }
-        int x;
-        int y;
-    }
+    int windowWidth = 1280;
+    int windowHeight = 720;
 
     protected abstract void draw();
 
@@ -89,11 +63,8 @@ public abstract class Engine
 
     private void loop()
     {
-        GL.createCapabilities();
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glOrtho(0.0,1280.0,720.0,0.0,0.0,1000.0f);
-        //glViewport(0,0,1280,720);
         start();
 
 
@@ -131,6 +102,13 @@ public abstract class Engine
         }
     }
 
+
+    public Point GetWindowDimensions()
+    {
+        return new Point(windowWidth,windowHeight);
+    }
+
+
     public Point MousePosition()
     {
         double[] MouseX = new double[1];
@@ -152,9 +130,15 @@ public abstract class Engine
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        window = glfwCreateWindow(1280, 720, "LWJGL Game!", NULL, NULL);
+        window = glfwCreateWindow(windowWidth, windowHeight, "LWJGL Game!", NULL, NULL);
         if ( window == NULL )
+        {
             throw new RuntimeException("Failed to create the GLFW window");
+        }
+
+
+
+
 
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
@@ -174,25 +158,40 @@ public abstract class Engine
 
         });
 
+
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
+
+        glfwShowWindow(window);
+
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
             glfwGetWindowSize(window, pWidth, pHeight);
 
+
+            windowWidth = pWidth.get(0);
+            windowHeight = pHeight.get(0);
+
+
+
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            glfwSetWindowPos(
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
         }
 
-        glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
 
-        glfwShowWindow(window);
+
+        GL.createCapabilities();
+        glViewport(0,0,windowWidth,windowHeight);
+        glOrtho(0.0,windowWidth,windowHeight,0.0,0.0,1000.0f);
+        glfwSetWindowSizeCallback(window,(win,width,height) -> {
+                windowWidth = width;
+                windowHeight= height;
+                System.out.println(width + ", " + height);
+                glViewport(0,0,windowWidth,windowHeight);
+                glOrtho(0.0,(double)windowWidth,(double)windowHeight,0.0,0.0,1000.0f);
+        });
     }
     public Engine()
     {
@@ -297,13 +296,17 @@ public abstract class Engine
 
     public void DrawPolygon(Point center, Size size,int sides, float rotation)
     {
+
         Point[] points = new Point[sides];
-        points[0] = new Point(0.0f, 1.0f);
+        Point p = new Point(0.0f, 1.0f);
+
+        p = new Point((float) (Math.cos(rotation) * p.x - p.y*Math.sin(rotation)),
+                                   (float) (Math.sin(rotation) * p.x + Math.cos(rotation)*p.y));
+        points[0] = p;
         for(int i =1; i<sides;i++)
         {
             Point last = points[i-1];
-            Point newPoint = new Point((float) (Math.cos((2*Math.PI)/sides) * last.x - last.y*Math.sin((2*Math.PI)/sides)),
-                    (float) (Math.sin((2*Math.PI)/sides) * last.x + Math.cos((2*Math.PI)/sides)*last.y));
+            Point newPoint =  MathUtil.rotate(last,(float)(2*Math.PI)/sides);
             points[i] = newPoint;
         }
         for(int i=0;i<sides;i++) {

@@ -11,6 +11,7 @@ public class Main {
                 //any objects you add here with AddGameObject()
                 //will automatically have their start(),tick(),and
                 //draw() methods called in the right places
+                AddGameObject(new PlayerShip(this));
             }
             @Override
             protected void draw() {
