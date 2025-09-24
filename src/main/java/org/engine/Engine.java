@@ -49,9 +49,12 @@ public abstract class Engine
 
     protected abstract void draw();
 
+    protected ArrayList<GameObject> addQueue = new ArrayList<>;
+
+
     public void AddGameObject(GameObject obj)
     {
-        objects.add(obj);
+        addQueue.add(obj);
         obj.start();
     }
 
@@ -69,6 +72,13 @@ public abstract class Engine
 
 
         while ( !glfwWindowShouldClose(window) ) {
+
+            for(GameObject obj : addQueue)
+            {
+                objects.add(obj);
+
+            }
+            addQueue.clear();
 
             glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -30,8 +30,21 @@ public abstract class GameObject
         position.y += amount.y;
     }
 
-    protected abstract void tick(double delta);
-    protected abstract void draw();
-    protected abstract void start();
-    protected abstract void stop();
+    protected void tick(double delta)
+    {
+
+    }
+    protected void draw()
+    {
+
+    }
+    protected void start()
+    {
+
+    }
+    protected void stop()
+    {
+
+
+    }
 }
